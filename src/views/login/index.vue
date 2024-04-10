@@ -35,9 +35,6 @@
 
 <script>
 import { validEmail } from '@/utils/validate'
-import request from '@/utils/request'
-import {getToken, setToken, removeToken} from '@/utils/auth'
-import {login} from '@/api/user'
 
 export default {
   name: 'Login',
@@ -99,18 +96,11 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true;
-          login(this.loginForm).then((response) => {
-            console.log(response);
-            if (response.code === 200) {
-              setToken(response.data.access_token);
+          this.$store.dispatch("user/login", {
+            username: this.loginForm.email.trim(), 
+            password: this.loginForm.password.trim()
+          }).then((response) => {
               this.$router.push({path:"/workbench"});
-            } else {
-              this.$message({
-                message: response.data.msg,
-                type:"error"
-              });
-              this.loading =false;
-            }
           }).catch((error) => {
             console.error(error);
             this.$message({
