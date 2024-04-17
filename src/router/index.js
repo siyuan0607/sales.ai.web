@@ -36,7 +36,6 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
   {
     path: '/404',
     component: () => import('@/views/404'),
@@ -51,33 +50,32 @@ export const constantRoutes = [
       path: 'workbench',
       name: 'Workbench',
       component: () => import('@/views/workbench/index'),
-      meta: { title: '工作台 - 小酥肉.AI', icon:"" }
+      meta: { title: '工作台', icon: '' }
+    },
+    {
+      path: 'customers',
+      name: 'customers',
+      component: () => import('@/views/customers/index'),
+      meta: { title: '客户管理', icon: '' }
+    },
+    {
+      path: 'knowledge',
+      name: 'knowledge',
+      component: () => import('@/views/knowledge/index'),
+      meta: { title: '产品知识', icon: '' }
+    },
+    {
+      path: 'opportunities',
+      name: 'opportunities',
+      component: () => import('@/views/opportunities/index'),
+      meta: { title: '商机管理', icon: '' }
+    },
+    {
+      path: 'assistant',
+      name: 'assistant',
+      component: () => import('@/views/assistant/index'),
+      meta: { title: '助理配置', icon: '' }
     }]
-  },
-
-  {
-    path: '/customers',
-    component: Layout,
-    meta: { title: '客户管理', icon: 'el-icon-s-help' },
-    component: () => import('@/views/customers/index'),
-  },
-  {
-    path: '/knowledge',
-    component: Layout,
-    meta: { title: '产品知识', icon: 'el-icon-s-help' },
-    component: () => import('@/views/knowledge/index'),
-  },
-  {
-    path: '/opportunities',
-    component: Layout,
-    meta: { title: '商机管理', icon: 'el-icon-s-help' },
-    component: () => import('@/views/opportunities/index'),
-  },
-  {
-    path: '/assistant',
-    component: Layout,
-    meta: { title: '助理配置', icon: 'el-icon-s-help' },
-    component: () => import('@/views/assistant/index'),
   },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
