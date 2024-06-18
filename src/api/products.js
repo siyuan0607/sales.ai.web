@@ -7,3 +7,19 @@ export function getList(params) {
     params
   })
 }
+
+export function updateProduct(params){
+  return request({
+    url: '/products',
+    method: 'post',
+    params
+  })
+}
+
+export function addProduct(params){
+  return request({
+    url: '/products',
+    method: 'put',
+    params
+  })
+}

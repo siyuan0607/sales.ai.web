@@ -52,7 +52,6 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 401 || res.code === 401 || res.code === 401) {
         // to re-login
@@ -72,13 +71,25 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    debugger
+    console.log(error)
+    if(error.response&&error.response.status === 401){
+      Message({
+        message: "登录信息过期，请重新登录",
+        type: 'error',
+        duration: 3 * 1000
+      })
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
+    }else{
     Message({
       message: error.message,
       type: 'error',
       duration: 5 * 1000
     })
     return Promise.reject(error)
+  }
   }
 )
 
