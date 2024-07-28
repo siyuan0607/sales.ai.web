@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '小酥肉 - 智能营销助手',
+  title: '小酥肉智能营销助手',
 
   /**
    * @type {boolean} true | false

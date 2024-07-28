@@ -114,15 +114,16 @@ export default {
             .then((response) => {
               this.$router.push({
                 path: "/workbench",
-              });
+              })
             })
             .catch((error) => {
-              console.error(error);
+              console.error(error)
               this.$message({
                 message: error,
-                type: "error",
-              });
-              this.loading = false;
+                type: "error"
+              })
+              this.loading = false
+              return false
             });
         } else {
           return false;
