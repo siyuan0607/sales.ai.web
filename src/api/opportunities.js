@@ -8,15 +8,6 @@ export function getList(params) {
   })
 }
 
-
-export function getCustomerList(params) {
-  return request({
-    url: '/customers',
-    method: 'get',
-    params
-  })
-}
-
 export function updateOpportunity(params) {
   return request({
     url: '/opportunities',

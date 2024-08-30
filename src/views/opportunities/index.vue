@@ -15,23 +15,24 @@
                 </el-select>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="search" icon="el-icon-search">查询</el-button>
+                <el-button type="primary" @click="searchOpportunities" icon="el-icon-search">查询</el-button>
             </el-form-item>
         </el-form>
         <el-table v-loading="listLoading" :data="list" style="width: 100%" element-loading-text="Loading" border fit
             highlight-current-row>
             <!-- 列 -->
-            <el-table-column prop="nick_name" label="客户姓名" width="180"></el-table-column>
+            <el-table-column prop="customer.nick_name" label="客户姓名" width="180"></el-table-column>
+            <el-table-column prop="product.name" label="产品名称" width="180"></el-table-column>
             <el-table-column label="标签" width="*">
                 <template slot-scope="scope">
-                    <el-tag class='user-tag' v-for="item in scope.row.tags" v-bind:key="item">
+                    <el-tag class='user-tag' v-for="item in scope.row.customer.tags" v-bind:key="item">
                         {{ item }}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="appointment_date" label="预约日期" width="180" align="center"></el-table-column>
-            <el-table-column prop="life_cycle" label="生命周期" width="100" align="center">
+            <el-table-column prop="customer.appointment_date" label="预约日期" width="180" align="center"></el-table-column>
+            <el-table-column prop="strategy" label="生命周期" width="100" align="center">
                 <template slot-scope="scope">
-                    {{ lifeCycleText(scope.row.life_cycle) }}
+                    {{ strategyText(scope.row.strategy) }}
                 </template>
             </el-table-column>
             <el-table-column label="状态" align="center" width="100">
@@ -53,7 +54,7 @@
 </template>
 
 <script>
-import { getList, getCustomerList, updateOpportunity } from "@/api/opportunities";
+import { getList, updateOpportunity } from "@/api/opportunities";
 
 export default {
     data() {
@@ -80,10 +81,6 @@ export default {
             },
             strategyOptions: [
                 {
-                    label: "全部",
-                    value: "",
-                },
-                {
                     label: "有意向",
                     value: "1",
                 },
@@ -98,7 +95,7 @@ export default {
                 {
                     label: "失败过",
                     value: "4",
-                },
+                }
             ]
         };
     },
@@ -106,10 +103,10 @@ export default {
         this.fetchData();
     },
     methods: {
-        searchCustomers(query) {
+        searchOpportunities(query) {
             if (query) {
                 this.loading = true
-                getCustomerList({
+                getList({
                     page_size: 20,
                     keywords: query
                 }).then((response) => {
@@ -183,6 +180,20 @@ export default {
             this.page = val;
             this.fetchData();
         },
+        statusText(val) {
+            if (val == 1) return "正常";
+            else return "已删除";
+        },
+        strategyText(val) {
+            if (val === '1')
+                return "有意向"
+            else if (val === '2')
+                return "跟进中"
+            else if (val === '3')
+                return "成交过"
+            else if (val === '4')
+                return "失败过"
+        }
     },
 };
 </script>
