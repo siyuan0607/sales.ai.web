@@ -41,11 +41,17 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
-
   {
     path: '/',
     component: Layout,
     redirect: '/workbench',
+    beforeEnter: (to, from, next) => {
+      if (!to.path.startsWith('/public')) {
+        next();
+      } else {
+        next(false); // 取消导航，保持原路径
+      }
+  },
     children: [{
       path: 'workbench',
       name: 'Workbench',
@@ -78,7 +84,13 @@ export const constantRoutes = [
     }]
   },
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  { path: '*', redirect: '/404', hidden: true, beforeEnter: (to, from, next) => {
+    if (!to.path.startsWith('/public')) {
+      next();
+    } else {
+      next(false); // 取消导航，保持原路径
+    }
+}}
 ]
 
 const createRouter = () => new Router({

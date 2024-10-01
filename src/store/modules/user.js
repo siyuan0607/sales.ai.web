@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout, getInfo, WXHeartbeat } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -6,7 +6,8 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    wx_alive: false
   }
 }
 
@@ -24,6 +25,9 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_WX_ALIVE: (state, alive) => {
+    state.wx_alive = alive
   }
 }
 
@@ -52,9 +56,13 @@ const actions = {
         if (!data) {
           return reject('Verification failed, please Login again.')
         }
-
-        const { name, avatar } = data
-
+        const { name, temp } = data
+        let avatar = ''
+        if (temp) {
+          avatar = temp
+        } else {
+          avatar = '/images/avator.png'
+        }
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
         resolve(data)
@@ -84,6 +92,21 @@ const actions = {
       removeToken() // must remove  token  first
       commit('RESET_STATE')
       resolve()
+    })
+  },
+  WXHeartbeat({ commit }) {
+    return new Promise((resolve, reject) => {
+      WXHeartbeat().then(response => {
+        const { data } = response
+        if (response.code === 200 && data === true)
+          commit('SET_WX_ALIVE', true)
+        else
+          commit('SET_WX_ALIVE', false)
+      }).catch(error => {
+        commit('SET_WX_ALIVE', false)
+        console.error(error)
+        reject(error)
+      })
     })
   }
 }
