@@ -15,7 +15,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="searchOpportunities" icon="el-icon-search">查询</el-button>
+                <el-button type="primary" @click="fetchData" icon="el-icon-search">查询</el-button>
             </el-form-item>
         </el-form>
         <el-table v-loading="listLoading" :data="list" style="width: 100%" element-loading-text="Loading" border fit
@@ -103,40 +103,37 @@ export default {
         this.fetchData();
     },
     methods: {
-        searchOpportunities(query) {
-            if (query) {
-                this.loading = true
-                getList({
-                    page_size: 20,
-                    keywords: query
-                }).then((response) => {
-                    let temp = []
-                    for (let i = 0; i < response.data.length; i++) {
-                        let label;
-                        let item = response.data[i]
-                        if (item.remark && item.remark.length > 0)
-                            label = item.remark + " (" + item.nick_name + ")"
-                        else
-                            label = item.nick_name
-                        temp.push({
-                            label: label,
-                            key: item.uid,
-                            value: item.uid
-                        })
-                    }
-                    this.options = temp
-                    this.loading = false
-                }).catch((error) => {
-                    console.error(error);
-                    this.$message({
-                        message: error,
-                        type: "error",
-                    });
-                    this.loading = false
-                })
-            } else {
-                this.options = []
-            }
+        searchCustomers() {
+
+        },
+        searchOpportunities() {
+            this.loading = true
+            getList({
+                page: 1,
+                page_size: this.pageSize,
+                products: "",
+                customers: customers,
+                strategy: this.fetchParam.strategy,
+            }).then((response) => {
+                let temp = []
+                for (let i = 0; i < response.data.length; i++) {
+                    let label;
+                    let item = response.data[i]
+                    if (item.remark && item.remark.length > 0)
+                        label = item.remark + " (" + item.nick_name + ")"
+                    else
+                        label = item.nick_name
+                    temp.push({
+                        label: label,
+                        key: item.uid,
+                        value: item.uid
+                    })
+                }
+                this.options = temp
+                this.loading = false
+            }).catch((error) => {
+                this.loading = false
+            })
         },
         handleDrawClose() {
             this.showDrawer = false
@@ -149,10 +146,12 @@ export default {
         },
         fetchData() {
             this.listLoading = true;
+            let customers = this.fetchParam.customers.join(",")
             const params = {
                 page: this.page,
                 page_size: this.pageSize,
-                customers: this.fetchParam.customers,
+                products: "",
+                customers: customers,
                 strategy: this.fetchParam.strategy,
             };
             getList(params)
@@ -163,11 +162,6 @@ export default {
                 })
                 .catch((error) => {
                     this.listLoading = false;
-                    console.error(error);
-                    this.$message({
-                        message: error,
-                        type: "error",
-                    });
                 });
         },
         search() {

@@ -20,8 +20,9 @@
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <el-dropdown-item>
-            {{ name }}
+            {{ name }}（{{ nick_name }}）
           </el-dropdown-item>
+
           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">退出</span>
           </el-dropdown-item>
@@ -32,7 +33,7 @@
       <div>
         <img :src="loginQrcode"
           style="width:200px; height:200px; cursor:pointer; display:block; margin:0 auto 15px auto;" title="点击刷新"
-          @click="flushQrcode" />
+          @click="refleshQrcode" />
         <el-input :model="captchaCode" placeholder="请输入验证码（选填）" />
       </div>
       <span slot="footer" class="dialog-footer">
@@ -57,7 +58,7 @@ export default {
       dialogContactsVisible: false,
       captchaCode: '',
       loginQrcode: '',
-      timer: null,
+      heart_timer: null,
       reloadTimer: null
     }
   },
@@ -70,14 +71,14 @@ export default {
       'sidebar',
       'avatar',
       'name',
-      'wx_alive'
+      'wx_alive',
+      'nick_name',
+      'labels_dict'
     ])
   },
   mounted() {
-    // 定时执行心跳程序，确定WX登录状态
-    this.timer = setInterval(() => {
-      this.$store.dispatch('user/WXHeartbeat')
-    }, 30000)
+    this.heart_beart()
+    this.get_labels()
   },
   destroyed() {
     if (this.timer != null)
@@ -89,10 +90,15 @@ export default {
       // 在这里执行你想要的操作，例如验证用户名
       if (newVal === true) {
         this.dialogLoginVisible = false
+        clearInterval(this.heart_timer)
+        this.heart_beart()
       }
     }
   },
   methods: {
+    get_labels() {
+      this.$store.dispatch('labels/getUserLabels')
+    },
     showWXLoginDialog() {
       WXlogin().then((resp) => {
         this.loginQrcode = resp.data.qrcode
@@ -103,13 +109,17 @@ export default {
           clearTimeout(this.reloadTimer)
           this.reloadTimer = null
         }, 30000)
+        clearInterval(this.heart_timer)
+        this.heart_timer = setInterval(() => {
+          this.$store.dispatch('user/WXHeartbeat')
+        }, 5000)
       })
         .catch((err) => {
           console.error(err)
           this.$message({ 'message': err, 'type': 'error' })
         })
     },
-    flushQrcode() {
+    refleshQrcode() {
       if (this.reloadTimer != null) {
         this.$message({
           message: "您的刷新太频繁了，请稍后刷新二维码",
@@ -170,6 +180,19 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    heart_beart() {
+      if (!this.heart_timer) {
+        // 首次初始话要手动执行一次
+        this.$store.dispatch('user/WXHeartbeat')
+      }
+      // 定时执行心跳程序，确定WX登录状态
+      if (this.heart_timer !== null) {
+        clearInterval(this.heart_beart)
+      }
+      this.heart_timer = setInterval(() => {
+        this.$store.dispatch('user/WXHeartbeat')
+      }, 120000)
     }
   }
 }

@@ -7,8 +7,16 @@ export function getList(params) {
     params
   })
 }
+export function getProductList(params) {
+  return request({
+    url: '/products',
+    method: 'get',
+    params
+  })
+}
 
-export function updateProduct(params){
+
+export function updateProduct(params) {
   return request({
     url: '/products',
     method: 'post',
@@ -16,7 +24,7 @@ export function updateProduct(params){
   })
 }
 
-export function addProduct(params){
+export function addProduct(params) {
   return request({
     url: '/products',
     method: 'put',

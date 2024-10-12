@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+    <el-form :inline="true" class="demo-form-inline">
       <el-form-item label="产品名称">
-        <el-input v-model="searchForm.productName" clearable />
+        <el-input v-model="productName" clearable />
       </el-form-item>
       <el-form-item>
         <el-button type="default" @click="search" icon="el-icon-search">查询</el-button>
@@ -60,9 +60,6 @@
         <el-form-item label="过期日期" prop="expire_date">
           <el-date-picker v-model="productEditorForm.expire_date" name="expire_date" type="date" placeholder="选择日期">
           </el-date-picker>
-        </el-form-item>
-        <el-form-item label="销售链接" prop="link">
-          <el-input v-model="productEditorForm.link" name="link" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="产品状态" prop="status">
           <el-select v-model="productEditorForm.status" placeholder="请选择" name="status">
@@ -129,17 +126,7 @@ export default {
             trigger: "blur",
             validator: validateNotNull,
           },
-        ],
-        link: [
-          {
-            required: true,
-            trigger: "blur",
-            validator: validateNotNull,
-          },
-        ],
-      },
-      searchForm: {
-        productName: "",
+        ]
       },
       statusOptions: [
         {
@@ -160,7 +147,6 @@ export default {
         sales_strategy: "",
         policy: "",
         expire_date: "",
-        link: "",
         status: "",
       },
       formTitle: "",
@@ -206,7 +192,6 @@ export default {
       this.formTitle = "编辑产品";
     },
     search() {
-      this.productName = this.searchForm.product_name;
       this.page = 1;
       this.fetchData();
     },
@@ -215,12 +200,12 @@ export default {
       this.fetchData();
     },
     handleSubmit() {
-      console.log(this.productEditorForm);
       this.$refs.productEditorForm.validate((valid) => {
         if (valid) {
           if (this.productEditorForm.uid === "") {
             addProduct(this.productEditorForm)
               .then((response) => {
+                console.log(response);
                 this.dialogVisible = false;
                 this.$message({
                   message: response.msg,
@@ -267,7 +252,6 @@ export default {
         sales_strategy: "",
         policy: "",
         expire_date: "",
-        link: "",
         status: "",
       };
     },

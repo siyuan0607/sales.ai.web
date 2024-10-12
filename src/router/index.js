@@ -51,7 +51,7 @@ export const constantRoutes = [
       } else {
         next(false); // 取消导航，保持原路径
       }
-  },
+    },
     children: [{
       path: 'workbench',
       name: 'Workbench',
@@ -65,10 +65,16 @@ export const constantRoutes = [
       meta: { title: '客户管理', icon: '' }
     },
     {
-      path: 'knowledge',
-      name: 'knowledge',
-      component: () => import('@/views/knowledge/index'),
+      path: 'products',
+      name: 'products',
+      component: () => import('@/views/products/index'),
       meta: { title: '产品知识', icon: '' }
+    },
+    {
+      path: 'sales_tools',
+      name: 'sales_tools',
+      component: () => import('@/views/sales_tools/index'),
+      meta: { title: '销售工具', icon: '' }
     },
     {
       path: 'opportunities',
@@ -77,20 +83,22 @@ export const constantRoutes = [
       meta: { title: '商机管理', icon: '' }
     },
     {
-      path: 'assistant',
-      name: 'assistant',
-      component: () => import('@/views/assistant/index'),
+      path: 'settings',
+      name: 'settings',
+      component: () => import('@/views/settings/index'),
       meta: { title: '助理配置', icon: '' }
     }]
   },
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true, beforeEnter: (to, from, next) => {
-    if (!to.path.startsWith('/public')) {
-      next();
-    } else {
-      next(false); // 取消导航，保持原路径
+  {
+    path: '*', redirect: '/404', hidden: true, beforeEnter: (to, from, next) => {
+      if (!to.path.startsWith('/public')) {
+        next();
+      } else {
+        next(false); // 取消导航，保持原路径
+      }
     }
-}}
+  }
 ]
 
 const createRouter = () => new Router({

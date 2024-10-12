@@ -15,19 +15,51 @@
             :label="item.label"></el-option>
         </el-select>
       </el-form-item>
-
       <el-form-item>
         <el-button type="primary" @click="search" icon="el-icon-search">查询</el-button>
       </el-form-item>
+      <el-form-item>
+        <el-dropdown @command="handleCommand">
+          <el-button>
+            更多<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="refreshLabels" icon="el-icon-refresh">同步标签</el-dropdown-item>
+            <el-dropdown-item command="syncContacts" icon="el-icon-refresh">同步WX好友</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </el-form-item>
     </el-form>
     <el-table v-loading="listLoading" :data="list" style="width: 100%" element-loading-text="Loading" border fit
-      highlight-current-row>
+      highlight-current-row @selection-change="handleSelectionChange" height="800">
       <!-- 列 -->
-      <el-table-column prop="nick_name" label="客户姓名" width="180"></el-table-column>
+      <el-table-column type="selection" width="55" align="center">
+      </el-table-column>
+      <el-table-column label="头像" width="75" align="center">
+        <template slot-scope="scope">
+          <img :src="scope.row.avatar" style="width:50px; height:50px;" />
+        </template>
+      </el-table-column>
+      <el-table-column label="名称" width="300">
+        <template slot-scope="scope">
+          <span v-if="scope.row.remark != ''">{{ scope.row.remark }} ({{ scope.row.nick_name }})</span>
+          <span v-if="scope.row.remark == ''">{{ scope.row.nick_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="性别" width="80" align="center">
+        <template slot-scope="scope">
+          {{ scope.row.sex == 1 ? '男' : scope.row.sex == 2 ? '女' : '未知' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="地区" width="200">
+        <template slot-scope="scope">
+          {{ scope.row.province }}/{{ scope.row.city }}
+        </template>
+      </el-table-column>
       <el-table-column label="标签" width="*">
         <template slot-scope="scope">
           <el-tag class='user-tag' v-for="item in scope.row.tags" v-bind:key="item">
-            {{ item }}</el-tag>
+            {{ showTag(item) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="appointment_date" label="预约日期" width="180" align="center"></el-table-column>
@@ -36,20 +68,22 @@
           {{ lifeCycleText(scope.row.life_cycle) }}
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" width="100">
-        <template slot-scope="scope">
-          {{ statusText(scope.row.status) }}
-        </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column label="操作" align="center" width="120" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <div class="example-pagination-block">
-      <el-pagination hide-on-single-page align="center" layout="prev, pager, next" :page-size="pageSize"
-        v-model:current-page="page" :total="total" @current-change="handleCurrentChange" />
+    <div class="example-pagination-block" style="margin-top:14px;">
+      <div style="display:inline-block">
+        <el-button type="danger" @click="selectedDelete()" v-bind:disabled="multipleFlag">删除</el-button>
+      </div>
+      <div style=" float:right;">
+        <el-pagination hide-on-single-page align="right" layout="prev, pager, next" :page-size="pageSize"
+          :current-page.sync="page" :total="total" @current-change="handleCurrentChange" />
+      </div>
     </div>
     <el-drawer :visible.sync="showDrawer" title="客户详情" :direction="direction" :before-close="handleDrawClose"
       ref="drawer">
@@ -96,7 +130,8 @@
 </template>
 
 <script>
-import { getList, updateCustomer } from "@/api/customers";
+import { getList, updateCustomer, refreshContacts, checkContactsRefresh, deleteCustomers } from "@/api/customers";
+import { mapGetters } from 'vuex'
 
 export default {
   data() {
@@ -114,9 +149,12 @@ export default {
       loading: false,
       page: 1,
       pageSize: 15,
+      multipleSelection: null,
+      multipleFlag: true,
       total: 0,
       showDrawer: false,
       formLabelWidth: "80px",
+      checkTimer: null,
       searchForm: {
         keywords: "",
         life_cycle: "",
@@ -164,11 +202,108 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapGetters([
+      'labels_dict'
+    ])
+  },
   created() {
     this.fetchData();
   },
-  computed: {},
   methods: {
+    handleSelectionChange(val) {
+      if (val.length > 0) {
+        this.multipleFlag = false
+      } else {
+        this.multipleFlag = true
+      }
+      this.multipleSelection = val;
+    },
+    selectedDelete(id) {
+      let ids = []
+      if (!id) {
+        this.multipleSelection.forEach(item => {
+          ids.push(item.id)
+        })
+      } else {
+        ids.push(id)
+      }
+      ids = ids.join(',')
+      this.$confirm('一旦删除将无法恢复，请问是否确定删除？', 'Warning', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteCustomers({ ids: ids })
+          .then((resp) => {
+            this.$message({
+              type: 'success',
+              message: '删除成功'
+            });
+            this.fetchData()
+          })
+          .catch((err) => {
+            console.error(err)
+            this.$message({
+              type: 'info',
+              message: '删除失败'
+            });
+          })
+      })
+    },
+    handleDelete(row) {
+      this.selectedDelete(row.id)
+    },
+    handleCommand(command) {
+      if (command === 'refreshLabels') {
+        this.refreshLabels()
+      } else if (command === 'syncContacts') {
+        this.syncContacts()
+      }
+    },
+    showTag(tagInfo) {
+      let tagId = tagInfo.split(':')[0]
+      if (this.labels_dict[tagId]) {
+        tagId = parseInt(tagId)
+        return this.labels_dict[tagId]
+      }
+      else {
+        return '未知'
+      }
+    },
+    syncContacts() {
+      if (this.checkTimer) {
+        this.$message({ 'message': '已经在同步，请勿重复操作', 'type': 'error' })
+        return
+      }
+      refreshContacts()
+        .then((resp) => {
+          this.$message({ 'message': '开始同步通讯录信息', 'type': 'success' })
+          this.checkTimer = setInterval(() => {
+            checkContactsRefresh().then((resp) => {
+              if (resp.code === 200 && resp.data === "done") {
+                clearInterval(this.checkTimer)
+                this.checkTimer = null
+                this.$message({ 'message': '同步完成', 'type': 'success' })
+                this.page = 1
+                this.fetchData()
+              }
+            })
+          }, 5000)
+        })
+        .catch((err) => {
+          console.error(err)
+          this.$message({ 'message': err, 'type': 'error' })
+        })
+    },
+    refreshLabels() {
+      this.$store.dispatch('labels/refreshLabels').then((data) => {
+        this.$message({ 'message': '标签刷新成功', 'type': 'success' })
+      }).catch((err) => {
+        console.error(err)
+        this.$message({ 'message': err, 'type': 'error' })
+      })
+    },
     handleDrawClose() {
       this.showDrawer = false
     },
@@ -229,7 +364,7 @@ export default {
         .then((response) => {
           this.listLoading = false;
           this.list = response.data;
-          this.total = response.total;
+          this.total = response.count;
         })
         .catch((error) => {
           this.listLoading = false;
@@ -243,7 +378,6 @@ export default {
     search() {
       this.fetchParam.keywords = this.searchForm.keywords;
       this.fetchParam.life_cycle = this.searchForm.life_cycle;
-      console.log(this.searchForm.appoint_date);
       if (this.searchForm.appoint_date.length === 2) {
         this.fetchParam.appoint_date_start =
           this.searchForm.appoint_date[0].toLocaleDateString() + " 00:00:00";

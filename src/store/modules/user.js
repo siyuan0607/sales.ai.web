@@ -7,6 +7,7 @@ const getDefaultState = () => {
     token: getToken(),
     name: '',
     avatar: '',
+    nick_name: '',
     wx_alive: false
   }
 }
@@ -25,6 +26,9 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_NICK_NAME: (state, nick_name) => {
+    state.nick_name = nick_name
   },
   SET_WX_ALIVE: (state, alive) => {
     state.wx_alive = alive
@@ -46,7 +50,6 @@ const actions = {
       })
     })
   },
-
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
@@ -56,15 +59,16 @@ const actions = {
         if (!data) {
           return reject('Verification failed, please Login again.')
         }
-        const { name, temp } = data
-        let avatar = ''
-        if (temp) {
-          avatar = temp
+        const { name, avatar, nick_name } = data
+        let avatar1 = ''
+        if (avatar) {
+          avatar1 = avatar
         } else {
-          avatar = '/images/avator.png'
+          avatar1 = '/images/avator.png'
         }
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_AVATAR', avatar1)
+        commit('SET_NICK_NAME', nick_name)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -98,10 +102,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       WXHeartbeat().then(response => {
         const { data } = response
-        if (response.code === 200 && data === true)
+        if (response.code === 200 && data === true) {
           commit('SET_WX_ALIVE', true)
-        else
+        }
+        else {
           commit('SET_WX_ALIVE', false)
+        }
       }).catch(error => {
         commit('SET_WX_ALIVE', false)
         console.error(error)

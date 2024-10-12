@@ -20,6 +20,7 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       let token = getToken();
       config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers['Content-Type'] = 'application/json'
     }
     return config;
   },
@@ -44,11 +45,11 @@ service.interceptors.response.use(
    */
   (response) => {
     const res = response.data;
-
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 200) {
+
       Message({
-        message: res.message || "Error",
+        message: res.msg || "Error",
         type: "error",
         duration: 5 * 1000,
       });
@@ -75,7 +76,6 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    console.log(error);
     if (error.response && error.response.status === 401) {
       Message({
         message: "登录信息过期，请重新登录",
@@ -86,8 +86,9 @@ service.interceptors.response.use(
         location.reload();
       });
     } else {
+      console.error(error.response)
       Message({
-        message: error.message,
+        message: error.response.data.msg,
         type: "error",
         duration: 5 * 1000,
       });
