@@ -7,7 +7,7 @@
                     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="商机状态">
+            <el-form-item label="生命周期">
                 <el-select v-model="searchForm.strategy" multiple collapse-tags collapse-tags-tooltip
                     style="width: 240px">
                     <el-option v-for="item in strategyOptions" :key="item.value" :label="item.label"
@@ -15,7 +15,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="fetchData" icon="el-icon-search">查询</el-button>
+                <el-button type="primary" @click="search" icon="el-icon-search">查询</el-button>
             </el-form-item>
         </el-form>
         <el-table v-loading="listLoading" :data="list" style="width: 100%" element-loading-text="Loading" border fit
@@ -71,7 +71,7 @@ export default {
             options: [],
             searchForm: {
                 customers: [],
-                strategy: "",
+                strategy: [],
             },
             editForm: {
             },
@@ -106,35 +106,6 @@ export default {
         searchCustomers() {
 
         },
-        searchOpportunities() {
-            this.loading = true
-            getList({
-                page: 1,
-                page_size: this.pageSize,
-                products: "",
-                customers: customers,
-                strategy: this.fetchParam.strategy,
-            }).then((response) => {
-                let temp = []
-                for (let i = 0; i < response.data.length; i++) {
-                    let label;
-                    let item = response.data[i]
-                    if (item.remark && item.remark.length > 0)
-                        label = item.remark + " (" + item.nick_name + ")"
-                    else
-                        label = item.nick_name
-                    temp.push({
-                        label: label,
-                        key: item.uid,
-                        value: item.uid
-                    })
-                }
-                this.options = temp
-                this.loading = false
-            }).catch((error) => {
-                this.loading = false
-            })
-        },
         handleDrawClose() {
             this.showDrawer = false
         },
@@ -146,12 +117,10 @@ export default {
         },
         fetchData() {
             this.listLoading = true;
-            let customers = this.fetchParam.customers.join(",")
             const params = {
                 page: this.page,
                 page_size: this.pageSize,
-                products: "",
-                customers: customers,
+                customers: this.fetchParam.customers,
                 strategy: this.fetchParam.strategy,
             };
             getList(params)
@@ -165,8 +134,8 @@ export default {
                 });
         },
         search() {
-            this.fetchParam.customers = this.searchForm.customers;
-            this.fetchParam.strategy = this.searchForm.strategy;
+            this.fetchParam.customers = this.searchForm.customers.join(",")
+            this.fetchParam.strategy = this.searchForm.strategy.join(",")
             this.page = 1;
             this.fetchData();
         },

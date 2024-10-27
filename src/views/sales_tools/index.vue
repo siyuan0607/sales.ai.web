@@ -188,15 +188,15 @@ export default {
       toolTypeOptions: [
         {
           label: "销售海报",
-          value: "poster",
+          value: "销售海报",
         },
         {
           label: "卖点总结",
-          value: "selling point",
+          value: "卖点总结",
         },
         {
           label: "案例说明",
-          value: "case",
+          value: "案例说明",
         },
       ],
       resourceTypeOptions: [
@@ -296,9 +296,9 @@ export default {
       else return "未知";
     },
     toolTypeText(toolType) {
-      if (toolType == "poster") return "销售海报";
-      else if (toolType == "selling point") return "卖点总结";
-      else if (toolType == "case") return "案例说明";
+      if (toolType == "销售海报") return "销售海报";
+      else if (toolType == "卖点总结") return "卖点总结";
+      else if (toolType == "案例说明") return "案例说明";
       else return "未知";
     },
     resourceTypeText(resourceType) {

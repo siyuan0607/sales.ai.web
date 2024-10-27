@@ -259,6 +259,7 @@ export default {
       this.dialogVisible = false;
     },
     handleEdit(row) {
+      row.status = String(row.status);
       this.productEditorForm = row;
       this.handleShowEditForm();
     },

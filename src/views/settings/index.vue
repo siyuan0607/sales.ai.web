@@ -48,6 +48,13 @@ export default {
     loadConfig() {
       getConfig().then((response) => {
         this.form = response.data;
+        let obj = JSON.parse(this.form.agent_config)
+        for (var key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            obj[key] = decodeURIComponent(obj[key]);
+          }
+        }
+        this.form.agent_config = JSON.stringify(obj);
       });
     },
   },
