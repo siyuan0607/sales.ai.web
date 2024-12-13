@@ -9,7 +9,7 @@
         style="position:relative; display:inline-block; margin:0 15px; bottom:10px;">
         WX未登录
       </el-button>
-      <el-button v-if="wx_alive" type="success" size="small" disabled="disabled"
+      <el-button v-if="wx_alive" type="success" size="small" @click="ShowWXLogout"
         style="position:relative; display:inline-block; margin:0 15px; bottom:10px;">
         WX已登录
       </el-button>
@@ -49,7 +49,7 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import { WXlogin, WXCheckLogin } from '@/api/user'
+import { WXlogin, WXCheckLogin, WXLogout } from '@/api/user'
 
 export default {
   data() {
@@ -96,6 +96,26 @@ export default {
     }
   },
   methods: {
+    ShowWXLogout() {
+      this.$confirm('您确定退出登录？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        WXLogout().then((resp) => {
+          this.$message({ 'message': resp.msg, 'type': 'success' })
+          this.$store.dispatch('user/WXHeartbeat')
+        }).catch(err => {
+          this.$message({ 'message': err, 'type': 'error' })
+          console.error(err)
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消退出'
+        })
+      })
+    },
     get_labels() {
       this.$store.dispatch('labels/getUserLabels')
     },

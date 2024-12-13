@@ -68,7 +68,6 @@
           {{ lifeCycleText(scope.row.life_cycle) }}
         </template>
       </el-table-column>
-      </el-table-column>
       <el-table-column label="操作" align="center" width="120" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>

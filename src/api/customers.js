@@ -8,12 +8,19 @@ export function getList(params) {
   })
 }
 
+export function getCustomerList(params) {
+  return request({
+    url: '/customers',
+    method: 'get',
+    params
+  })
+}
 
 export function updateCustomer(params) {
   return request({
     url: '/customers',
     method: 'post',
-    params
+    data: params
   })
 }
 
@@ -37,7 +44,7 @@ export function refreshContacts(params) {
   return request({
     url: '/wechat/contacts',
     method: 'post',
-    params
+    data: params
   })
 }
 

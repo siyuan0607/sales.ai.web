@@ -16,9 +16,6 @@ export function getInfo(token) {
   })
 }
 
-export function logout() {
-  store.setters.token = ""
-}
 
 export function WXlogin() {
   return request({
@@ -30,6 +27,13 @@ export function WXlogin() {
 export function WXHeartbeat() {
   return request({
     url: '/wechat/heartbeat',
+    method: 'get'
+  })
+}
+
+export function WXLogout() {
+  return request({
+    url: '/wechat/logout',
     method: 'get'
   })
 }

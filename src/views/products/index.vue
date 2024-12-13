@@ -8,7 +8,7 @@
         <el-button type="default" @click="search" icon="el-icon-search">查询</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleShowAddForm" icon="el-icon-plus">新增</el-button>
+        <el-button type="primary" @click="showForm" icon="el-icon-plus">新增</el-button>
       </el-form-item>
     </el-form>
     <el-table v-loading="listLoading" :data="list" style="width: 100%" element-loading-text="Loading" border fit
@@ -16,7 +16,8 @@
       <!-- 列 -->
       <el-table-column prop="category" label="产品类目" align="center" width="120"></el-table-column>
       <el-table-column prop="name" label="产品名称" width="250"></el-table-column>
-      <el-table-column prop="sales_point" label="销售卖点" width="*"></el-table-column>
+      <el-table-column label="销售卖点" width="*" prop="sales_point">
+      </el-table-column>
       <el-table-column label="产品状态" align="center" width="120">
         <template slot-scope="scope">
           {{ statusText(scope.row.status) }}
@@ -25,6 +26,7 @@
       <el-table-column label="操作" align="center" width="120">
         <template slot-scope="scope">
           <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -79,7 +81,7 @@
 </template>
 
 <script>
-import { getList, updateProduct, addProduct } from "@/api/products";
+import { getList, updateProduct, addProduct, delProduct } from "@/api/products";
 
 export default {
   data() {
@@ -159,7 +161,8 @@ export default {
   methods: {
     statusText(status) {
       if (status == 1) return "上架";
-      else return "下架";
+      else if (status == 0) return "下架";
+      else return "未知";
     },
     fetchData() {
       this.listLoading = true;
@@ -183,13 +186,13 @@ export default {
           });
         });
     },
-    handleShowAddForm() {
+    showForm(action) {
       this.dialogVisible = true;
-      this.formTitle = "新增产品";
-    },
-    handleShowEditForm() {
-      this.dialogVisible = true;
-      this.formTitle = "编辑产品";
+      if (typeof action === 'object') {
+        this.clearForm();
+        action = '新增';
+      }
+      this.formTitle = action + "产品";
     },
     search() {
       this.page = 1;
@@ -258,10 +261,29 @@ export default {
     closeDialog() {
       this.dialogVisible = false;
     },
+    handleDelete(row) {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          delProduct({
+            uid: row.uid
+          }).then(resp => {
+            this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            this.fetchData();
+          })
+
+        })
+    },
     handleEdit(row) {
       row.status = String(row.status);
       this.productEditorForm = row;
-      this.handleShowEditForm();
+      this.showForm('编辑');
     },
   },
 };

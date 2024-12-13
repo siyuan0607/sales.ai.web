@@ -11,6 +11,6 @@ export function updateConfig(data) {
   return request({
     url: '/user_settings',
     method: 'post',
-    data
+    data: data
   })
 }

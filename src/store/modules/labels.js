@@ -8,6 +8,7 @@ const state = defaultState()
 
 const mutations = {
     SET_LABELS: (state, labels_dict) => {
+        console.log('SET_LABELS: ', labels_dict)
         state.labels_dict = labels_dict
     }
 }

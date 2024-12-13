@@ -4,7 +4,8 @@
             <el-form-item label="客户">
                 <el-select v-model="searchForm.customers" multiple filterable remote reserve-keyword placeholder="请选择客户"
                     remote-show-suffix :remote-method="searchCustomers" :loading="loading" style="width: 240px">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+                    <el-option v-for="item in customerOptions" :key="item.value" :label="item.label"
+                        :value="item.value" />
                 </el-select>
             </el-form-item>
             <el-form-item label="生命周期">
@@ -55,6 +56,7 @@
 
 <script>
 import { getList, updateOpportunity } from "@/api/opportunities";
+import { getCustomerList } from "@/api/customers";
 
 export default {
     data() {
@@ -69,6 +71,7 @@ export default {
             showDrawer: false,
             formLabelWidth: "80px",
             options: [],
+            customerOptions: [],
             searchForm: {
                 customers: [],
                 strategy: [],
@@ -103,8 +106,29 @@ export default {
         this.fetchData();
     },
     methods: {
-        searchCustomers() {
-
+        searchCustomers(query) {
+            if (query !== '') {
+                this.loading = true;
+                getCustomerList({
+                    page: 1,
+                    page_size: 10,
+                    keywords: query
+                }).then(resp => {
+                    this.customerOptions.length = 0
+                    for (let i = 0; i < resp.data.length; i++) {
+                        let item = resp.data[i]
+                        let name = item.nick_name
+                        if (item.remark.length > 0) {
+                            name += ' (' + item.remark + ')'
+                        }
+                        this.customerOptions.push({
+                            label: name,
+                            value: item.uid
+                        })
+                    }
+                    this.loading = false
+                })
+            }
         },
         handleDrawClose() {
             this.showDrawer = false

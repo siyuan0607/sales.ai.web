@@ -12,7 +12,7 @@ export function updateOpportunity(params) {
   return request({
     url: '/opportunities',
     method: 'post',
-    params
+    data: params
   })
 }
 
