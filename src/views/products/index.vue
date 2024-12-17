@@ -44,6 +44,9 @@
         <el-form-item label="产品名称" prop="name">
           <el-input v-model="productEditorForm.name" name="name" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="产品编码" prop="name">
+          <el-input v-model="productEditorForm.uid" name="uid" autocomplete="off" readonly></el-input>
+        </el-form-item>
         <el-form-item label="产品别名" prop="nick_name">
           <el-input v-model="productEditorForm.nick_name" name="nick_name" autocomplete="off"></el-input>
         </el-form-item>

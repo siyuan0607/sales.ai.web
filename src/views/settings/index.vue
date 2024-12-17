@@ -5,7 +5,7 @@
         <el-input v-model="form.agent_uid" />
       </el-form-item>
       <el-form-item label="助理配置">
-        <el-input v-model="form.agent_config" type="textarea" rows="8" />
+        <el-input v-model="form.agent_config" type="textarea" rows="20" />
       </el-form-item>
       <el-form-item>
         <el-button :loading="loading" type="primary" @click="onSubmit">保存</el-button>
@@ -48,13 +48,8 @@ export default {
     loadConfig() {
       getConfig().then((response) => {
         this.form = response.data;
-        let obj = JSON.parse(this.form.agent_config)
-        for (var key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            obj[key] = decodeURIComponent(obj[key]);
-          }
-        }
-        this.form.agent_config = JSON.stringify(obj);
+        let config = this.form.agent_config
+        this.form.agent_config = JSON.stringify(config, null, 2);
       });
     },
   },
