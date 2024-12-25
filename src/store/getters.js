@@ -7,6 +7,8 @@ const getters = {
   wx_alive: state => state.user.wx_alive,
   nick_name: state => state.user.nick_name,
   labels_dict: state => state.labels.labels_dict,
+  notify_count: state => state.user.notify_count,
+  chatSessions: state => state.user.chatSessions
   // roles: state => state.user.roles
 }
 export default getters

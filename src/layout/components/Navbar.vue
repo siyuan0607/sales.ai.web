@@ -5,6 +5,14 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+      <el-button icon="el-icon-bell" size="small" v-if="notify_count > 0" type="warning" @click="gotoWorkbench"
+        style="position:relative; display:inline-block;  bottom:10px;">
+        发现 {{ notify_count }} 个成交机会啦！
+      </el-button>
+      <el-button icon="el-icon-bell" size="small" v-else disabled type="info"
+        style="position:relative; display:inline-block; margin:0 15px; bottom:10px;">
+        挖掘商机中
+      </el-button>
       <el-button type="danger" v-if="wx_alive == false" size="small" @click="showWXLoginDialog"
         style="position:relative; display:inline-block; margin:0 15px; bottom:10px;">
         WX未登录
@@ -59,7 +67,8 @@ export default {
       captchaCode: '',
       loginQrcode: '',
       heart_timer: null,
-      reloadTimer: null
+      reloadTimer: null,
+      sessionTimer: null
     }
   },
   components: {
@@ -73,12 +82,14 @@ export default {
       'name',
       'wx_alive',
       'nick_name',
-      'labels_dict'
+      'labels_dict',
+      'notify_count'
     ])
   },
   mounted() {
     this.heart_beart()
     this.get_labels()
+    this.refreshSessions()
   },
   destroyed() {
     if (this.timer != null)
@@ -96,6 +107,9 @@ export default {
     }
   },
   methods: {
+    gotoWorkbench() {
+      this.$router.push('/workbench')
+    },
     ShowWXLogout() {
       this.$confirm('您确定退出登录？', '提示', {
         confirmButtonText: '确定',
@@ -213,6 +227,19 @@ export default {
       this.heart_timer = setInterval(() => {
         this.$store.dispatch('user/WXHeartbeat')
       }, 120000)
+    },
+    refreshSessions() {
+      if (!this.sessionTimer) {
+        this.$store.dispatch('user/refreshChatSessions')
+      }
+
+      if (this.sessionTimer !== null) {
+        clearInterval(this.sessionTimer)
+      }
+      // rerefresh session list every 5 secs.
+      this.sessionTimer = setInterval(() => {
+        this.$store.dispatch('user/refreshChatSessions')
+      }, 5000)
     }
   }
 }

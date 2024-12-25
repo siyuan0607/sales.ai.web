@@ -1,4 +1,5 @@
 import { login, getInfo, WXHeartbeat } from '@/api/user'
+import { refreshChatSessions } from '@/api/workbench'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -8,7 +9,10 @@ const getDefaultState = () => {
     name: '',
     avatar: '',
     nick_name: '',
-    wx_alive: false
+    wx_alive: false,
+    notify_count: 0,
+    chatSessions: [],
+    last_message_time: ''
   }
 }
 
@@ -32,6 +36,15 @@ const mutations = {
   },
   SET_WX_ALIVE: (state, alive) => {
     state.wx_alive = alive
+  },
+  SET_NOTIFY_COUNT: (state, count) => {
+    state.notify_count = count
+  },
+  SET_CHAT_SESSIONS: (state, sessions) => {
+    state.chatSessions = sessions
+  },
+  SET_LAST_MESSAGE_TIME: (state, time) => {
+    state.last_message_time = time
   }
 }
 
@@ -85,7 +98,6 @@ const actions = {
       resolve()
     })
   },
-
   // remove token
   resetToken({ commit }) {
     return new Promise(resolve => {
@@ -110,7 +122,35 @@ const actions = {
         reject(error)
       })
     })
-  }
+  },
+  refreshChatSessions({ commit }) {
+    return new Promise((resolve, reject) => {
+
+      const params = { last_message_time: null }
+      if (state.last_message_time) {
+        params.last_message_time = state.last_message_time
+      }
+      refreshChatSessions(params).then(response => {
+        const { data, need_helps_count, last_message_time } = response
+        if (response.code === 200) {
+          commit('SET_NOTIFY_COUNT', need_helps_count)
+          commit('SET_CHAT_SESSIONS', data)
+          commit('SET_LAST_MESSAGE_TIME', last_message_time)
+          resolve(response)
+        } else if (response.code === 304) {
+          // do nothing
+          console.log('304 not changed')
+        }
+        else {
+          commit('SET_NOTIFY_COUNT', 0)
+          commit('SET_CHAT_SESSIONS', [])
+        }
+      }).catch(error => {
+        console.error(error)
+        reject(error)
+      })
+    })
+  },
 }
 
 export default {
