@@ -8,6 +8,16 @@ export function getList(params) {
   })
 }
 
+export function getOpportunity(params) {
+  params.page = 1
+  params.page_size = 1
+  return request({
+    url: '/opportunities',
+    method: 'get',
+    params
+  })
+}
+
 export function updateOpportunity(params) {
   return request({
     url: '/opportunities',

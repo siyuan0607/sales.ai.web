@@ -53,7 +53,7 @@
                         </el-col>
                         <el-col :span="10" class="profile-container">
                             <div class="profile-area">
-                                <el-form ref="form" :model="focusCustomer" label-width="100px">
+                                <el-form ref="customerForm" :model="focusCustomer" label-width="100px">
                                     <el-form-item label="客户名称">
                                         <el-input v-model="focusCustomer.fullName" readonly></el-input>
                                     </el-form-item>
@@ -78,12 +78,33 @@
 
                                 </div>
                                 <el-divider>商机信息</el-divider>
+                                <div v-if="focusOpportunity" class="opportunity-area">
+                                    <el-form ref="opportunityForm" :model="focusOpportunity" label-width="100px">
+                                        <el-form-item label="销售产品">
+                                            <el-input v-model="focusOpportunity.product.name" readonly></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="商机阶段">
+                                            <el-select v-model="focusOpportunity.strStrategy" readonly disabled>
+                                                <el-option label="有意向" value="1"></el-option>
+                                                <el-option label="跟进中" value="2"></el-option>
+                                                <el-option label="成交过" value="3"></el-option>
+                                                <el-option label="失败过" value="4"></el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                    </el-form>
+                                </div>
+                                <div v-else style="text-align:center; color: #cccccc;margin-top:14px; font-size:14px;">
+                                    暂无
+                                </div>
                             </div>
                             <div class="operate-area">
-                                <el-button type="primary" icon="el-icon-plus">创建商机</el-button>
-                                <el-button type="success" icon="el-icon-success">已成交</el-button>
-                                <el-button type="danger" icon="el-icon-error">已输单</el-button>
-
+                                <div v-if="focusOpportunity">
+                                    <el-button type="success" icon="el-icon-success">已成交</el-button>
+                                    <el-button type="danger" icon="el-icon-error">已输单</el-button>
+                                </div>
+                                <div v-else>
+                                    <el-button type="primary" icon="el-icon-plus">创建商机</el-button>
+                                </div>
                             </div>
                         </el-col>
                     </el-row>
@@ -99,12 +120,14 @@
             </el-col>
         </el-row>
     </div>
+
 </template>
 <script>
 import { mapGetters } from 'vuex'
 import { getChatLog } from '@/api/chat_logs.js'
 import ChatContent from '@/components/ChatContent'
 import { updateCustomer } from '@/api/customers.js'
+import { getOpportunity } from '@/api/opportunities.js'
 
 export default {
     computed: {
@@ -156,6 +179,7 @@ export default {
             },
             focusCustomer: null,
             focusLogs: [],
+            focusOpportunity: null,
             customerChatLogs: {}
         }
     },
@@ -204,6 +228,24 @@ export default {
                         container.scrollTop = container.scrollHeight;
                     });
                 })
+
+                // get the opportunity from restful service, if the opportunity is not exist, show the empty alert.
+                getOpportunity({ customer_uid: newVal.uid }).then((resp) => {
+                    const { data, code } = resp
+                    if (code === 200) {
+                        this.focusOpportunity = data && data.length > 0 ? data[0] : null
+                        if (this.focusOpportunity) {
+                            this.focusOpportunity.strStrategy = this.focusOpportunity.strategy + ""
+                        }
+                    }
+                }).catch((error) => {
+                    console.log(error)
+                    this.$message({
+                        message: "获取商机信息失败",
+                        type: "error"
+                    })
+                })
+
             }
         }
     },
